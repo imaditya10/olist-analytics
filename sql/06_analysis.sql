@@ -99,20 +99,41 @@ GROUP BY 1;
 
 
 -- ---------------------
--- 9. CUSTOMER ORDER DISTRIBUTION
+-- 9. REPEAT CUSTOMER ORDER DISTRIBUTION (REAL CUSTOMERS)
+-- ---------------------
+
+-- ---------------------
+-- 9A. REPEAT CUSTOMERS (REAL CUSTOMERS)
 -- ---------------------
 SELECT
-    order_count,
+    c.customer_unique_id,
+    COUNT(DISTINCT o.order_id) AS total_orders
+FROM fact_orders o
+JOIN dim_customers c
+    ON o.customer_id = c.customer_id
+GROUP BY c.customer_unique_id
+HAVING COUNT(DISTINCT o.order_id) > 1
+ORDER BY total_orders DESC;
+
+
+-- ---------------------
+-- 9B. CUSTOMER ORDER FREQUENCY DISTRIBUTION
+-- ---------------------
+SELECT
+    total_orders,
     COUNT(*) AS customers
 FROM (
     SELECT
-        customer_id,
-        COUNT(order_id) AS order_count
-    FROM fact_orders
-    GROUP BY customer_id
+        c.customer_unique_id,
+        COUNT(DISTINCT o.order_id) AS total_orders
+    FROM fact_orders o
+    JOIN dim_customers c
+        ON o.customer_id = c.customer_id
+    GROUP BY c.customer_unique_id
 ) t
-GROUP BY order_count
-ORDER BY order_count;
+GROUP BY total_orders
+ORDER BY total_orders;
+
 
 
 -- ---------------------
